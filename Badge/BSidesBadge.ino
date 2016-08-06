@@ -1,4 +1,3 @@
-
 // This is the master template for Arduino IDE development on the
 // BSIDES Canberra 2016 "badge" development board.
 // Badge design by Ingmar M. Dec2015-Apr2016 (c) until waived by author.
@@ -31,7 +30,7 @@
 #undef  USESD
 #undef  USEAD
 #define USEIO
-#define USESERIAL
+#define USESERIAL 1
 
 // Define I/O used by all peripherals.
 #define ADEXP   1  // Active LOW to CS MCP2308 8 input A/D
@@ -162,11 +161,68 @@ const char welcomeMessage[] = "Welcome to BSides Canberra - Kylie & Silvio!";
 
 #define USEWIFI
 
+// function protos
+void drawLogo();
+void drawCredits(); 
+int drawCustom(void);
+void drawMessageScroller(int w, int n);
+void drawNetworkScroller(int w, const char *staticText, int timeToRun);
+void makeRotateXMatrix(struct matrix_s *r, int angle);
+void makeRotateYMatrix(struct matrix_s *r, int angle);
+void makeRotateZMatrix(struct matrix_s *r, int angle);
+void matrixVectorMultiply(struct vertex_s *r, const struct vertex_s *v, struct matrix_s *x);
+void perspectiveView(struct vertex_s *v);
+void drawRotatingBox(const char *staticText, int n);
+int checkButtonSelect();
+void drawScheduleDetails(void);
+void draw8(const char *msg, int n);
+void connectWifi(void);
+int getNetworkMsg(char *buf, int bufSz, const char *path);
+void drawYScrollerLine(int n, int offsetX, int offsetY, const char *text, int start, int len);
+void drawYScroller(int n, const char *text, const char *staticText, int timeToRun);
+void drawScrollerLine(int n, const char *text, int start, int len);
+void drawScroller(int n, const char *text, const char *staticText, int timeToRun);
+void deleteCopper(int startY, int scale);
+void drawCopper(int startY, int scale, int colourShift);
+void printIndent(int n);
+void drawScheduleIndentedText(int n, int w, const char *text);
+void drawScheduleTime(const char *slot, const char *talk, const char *speaker);
+void drawSchedule(const char *title, struct schedule_s *schedule);
+void testtriangles();
+void testdrawcircles(uint8_t radius, uint16_t color);
+void testroundrects();
+void IDent();
+int getVbatt();
+void graphV();
+uint8_t bmpRead8();
+void bmpSeek(uint32_t pos);
+void bmpFileRead(uint8_t *buf, uint32_t sz);
+uint16_t bmpRead16();
+uint32_t bmpRead32();
+void bmpDraw(uint8_t x, uint8_t y);
+
 WiFiClient client;
 bool wifiConnected = false;
 char msgbuf[MSGBUFSZ + 1];
 char realtimeMsg[REALTIMEMSGSZ + 1];
- 
+bool firstTime = true;
+
+void loop() {
+  if (firstTime) {
+    while (drawCustom() == 0);
+    firstTime = false;
+  } else {
+    drawCustom();
+  }
+  drawLogo();
+  drawMessageScroller(12, 200);
+  drawScheduleDetails();
+  drawNetworkScroller(12, "Live Twitter Stream", 200);
+  draw8(msg8, 10); 
+  drawRotatingBox("BSides Canberra", 4);
+  drawCredits();
+}
+
 void setup() {
   // I/O declarations
 
@@ -228,24 +284,6 @@ void setup() {
   connectWifi();
 }
 
-bool firstTime = true;
-
-void loop() {
-  if (firstTime) {
-    while (drawCustom() == 0);
-    firstTime = false;
-  } else {
-    drawCustom();
-  }
-  drawLogo();
-  drawMessageScroller(12, 200);
-  drawSchedule();
-  drawNetworkScroller(12, "Live Twitter Stream", 200);
-  draw8(msg8, 10); 
-  drawRotatingBox("BSides Canberra", 4);
-  drawCredits();
-}
-
 void
 drawLogo()
 {
@@ -277,7 +315,7 @@ drawCredits()
     tft.println();
     
     tft.println("  Badge designed by Iggy");
-    tft.println("  Code by Silvio");
+    tft.println("  Code by Silvio & Maczor");
     tft.println("  Network by Kylie");
     tft.println("  Sponsored by Telstra");
     tft.println("  Assembly by AAron,");
@@ -517,7 +555,7 @@ checkButtonSelect()
 }
 
 void
-drawSchedule(void)
+drawScheduleDetails(void)
 {
   drawSchedule("Day 1", day1schedule);
   drawSchedule("Day 2", day2schedule);
@@ -1218,4 +1256,3 @@ bmpDraw(uint8_t x, uint8_t y) {
   }
   if(!goodBmp) Serial.println("BMP format not recognized.");
 }
-
