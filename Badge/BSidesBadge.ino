@@ -30,7 +30,7 @@
 #undef  USESD
 #undef  USEAD
 #define USEIO
-#define USESERIAL 1
+#define USESERIAL
 
 // Define I/O used by all peripherals.
 #define ADEXP   1  // Active LOW to CS MCP2308 8 input A/D
@@ -205,23 +205,8 @@ WiFiClient client;
 bool wifiConnected = false;
 char msgbuf[MSGBUFSZ + 1];
 char realtimeMsg[REALTIMEMSGSZ + 1];
-bool firstTime = true;
 
-void loop() {
-  if (firstTime) {
-    while (drawCustom() == 0);
-    firstTime = false;
-  } else {
-    drawCustom();
-  }
-  drawLogo();
-  drawMessageScroller(12, 200);
-  drawScheduleDetails();
-  drawNetworkScroller(12, "Live Twitter Stream", 200);
-  draw8(msg8, 10); 
-  drawRotatingBox("BSides Canberra", 4);
-  drawCredits();
-}
+bool firstTime = true;
 
 void setup() {
   // I/O declarations
@@ -284,6 +269,22 @@ void setup() {
   connectWifi();
 }
 
+void loop() {
+  if (firstTime) {
+    while (drawCustom() == 0);
+    firstTime = false;
+  } else {
+    drawCustom();
+  }
+  drawLogo();
+  drawMessageScroller(12, 200);
+  drawScheduleDetails();
+  drawNetworkScroller(12, "Live Twitter Stream", 200);
+  draw8(msg8, 10); 
+  drawRotatingBox("BSides Canberra", 4);
+  drawCredits();
+}
+
 void
 drawLogo()
 {
@@ -315,7 +316,7 @@ drawCredits()
     tft.println();
     
     tft.println("  Badge designed by Iggy");
-    tft.println("  Code by Silvio & Maczor");
+    tft.println("  Code by Silvio");
     tft.println("  Network by Kylie");
     tft.println("  Sponsored by Telstra");
     tft.println("  Assembly by AAron,");
